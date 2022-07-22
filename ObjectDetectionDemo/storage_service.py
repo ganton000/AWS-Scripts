@@ -7,4 +7,7 @@ class StorageService:
 		self.s3 = session.resource('s3')
 
 	def get_all_files(self, storage_location):
+		'''
+		Returns list of s3 objects
+		'''
 		return self.s3.Bucket(storage_location).objects.all()

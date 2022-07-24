@@ -3,3 +3,4 @@ venv/
 .DS_Store
 **.chalice/
 **.env
+**/__pycache__/

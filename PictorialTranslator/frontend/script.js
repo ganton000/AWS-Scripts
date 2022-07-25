@@ -31,7 +31,7 @@ async function uploadImage() {
 			if(response.ok){
 				return response.json();
 			} else {
-				throw new HttpError(response):
+				throw new HttpError(response)
 			}
 		})
 	})
@@ -72,7 +72,7 @@ function annotateImage(translations) {
 	let translationsElem = document.getElementById("translations");
 
 	while (translationsElem.firstChild) {
-		translationsElem.removeChild(translationsElem.firstChild)l
+		translationsElem.removeChild(translationsElem.firstChild)
 	}
 	translationsElem.clear
 

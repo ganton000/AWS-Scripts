@@ -1,3 +1,4 @@
+##Requires IAM policy for DynamoDB access to be attached
 import contact_store
 
 store_location = 'Contacts'

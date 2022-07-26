@@ -1,29 +1,70 @@
 from chalice import Chalice
+from chalicelib import storage_service
+from chalicelib import transcription_service
+from chalicelib import translation_service
+from chalicelib import speech_service
 
-app = Chalice(app_name='backend')
+import base64
+import json
+
+app = Chalice(app_name='Capabilities')
+app.debug = True
+
+#Initialize Vars
+storage_location = 'contents.aws.ai'
+storage_service = storage_service.StorageService(storage_location)
+transcription_service = transcription_service.TranscriptionService(storage_service)
+translation_service = translation_service.TranslationService()
+speech_service = speech_service.SpeechService(storage_service)
 
 
-@app.route('/')
-def index():
-    return {'hello': 'world'}
+#REST
+@app.route('/recordings/{recording_id}/translate-text', methods=['POST'], cors=True)
+def translate_recording(recording_id):
+    '''
+    transcribes specified audio and translates the transcription text
+    The <recording id> identifies the filename of the audio file in S3 bucket.
+    '''
 
+    request_data = json.loads(app.current_request.raw_body)
+    from_lang = request_data['fromLang']
+    to_lang = request_data['toLang']
 
-# The view function above will return {"hello": "world"}
-# whenever you make an HTTP GET request to '/'.
-#
-# Here are a few more examples:
-#
-# @app.route('/hello/{name}')
-# def hello_name(name):
-#    # '/hello/james' -> {"hello": "james"}
-#    return {'hello': name}
-#
-# @app.route('/users', methods=['POST'])
-# def create_user():
-#     # This is the JSON body the user sent in their POST request.
-#     user_as_json = app.current_request.json_body
-#     # We'll echo the json body back to the user in a 'user' key.
-#     return {'user': user_as_json}
-#
-# See the README documentation for more examples.
-#
+    transcription_text = transcription_service.transcribe_audio(recording_id, from_lang)
+    translation_text = translation_service.translate_text(transcription_text, target_language=to_lang)
+
+    return {
+        'text': transcription_text,
+        'translation': translation_text
+    }
+
+@app.route('/synthesize_speech', methods=['POST'], cors=True)
+def synthesize_speech():
+    '''
+    Performs text-to-speech on specified text/language
+    '''
+
+    request_data = json.loads(app.current_request.raw_body)
+    text = request_data['text']
+    language = request_data['language']
+
+    translation_audio_url = speech_service.synthesize_speech(text, language)
+
+    return {
+        'audioUrl': translation_audio_url
+    }
+
+@app.route('/recordings', methods=['POST'], cors=True)
+def upload_recording():
+    '''
+    Processes file upload and saves file to S3
+    '''
+
+    request_data = json.loads(app.current_request.raw_body)
+    file_name = request_data['filename']
+    file_bytes = base64.b64decode(request_data['filebytes'])
+
+    file_info = storage_service.upload_file(file_bytes, file_name)
+
+    return file_info
+

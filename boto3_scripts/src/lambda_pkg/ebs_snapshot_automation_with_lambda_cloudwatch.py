@@ -41,9 +41,10 @@ def paginate_over_ebs_volumes_with_filter(filter):
 list_of_volids = paginate_over_ebs_volumes_with_filter(filter_prod_backup)
 
 def generate_snapshot_of_volid(volids: list):
+	snapids = []
 	for each_volid in list_of_volids:
 		print(f"Taking snap of {each_volid}")
-		ec2_client.create_snapshot(
+		res = ec2_client.create_snapshot(
 			Description="Taking snap with Lambda and CW",
 			VolumeId=each_volid,
 			TagSpecifications=[{
@@ -54,5 +55,14 @@ def generate_snapshot_of_volid(volids: list):
 				}]
 			}]
 		)
+		snapids.append(res.get('SnapshotId'))
+
+	print(f'The snap ids are: {snapids}')
+
+	waiter = ec2_client.get_waiter('snapshot_completed')
+	waiter.wait(SnapshotIds=[snapids])
+
+	print(f"Successfully completed snapshots for the volumes with ids {volids}")
+
 
 generate_snapshot_of_volid(list_of_volids)

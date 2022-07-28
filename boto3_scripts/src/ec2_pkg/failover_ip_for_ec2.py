@@ -3,6 +3,13 @@
 #so secondary ip gets assigned to failover instance
 #Also enable ec2 permissions for lambda role
 
+##To automate need to create CloudWatch Event to trigger this lambda function
+#Events -> Rules -> Event Pattern: ServiceName = EC2
+#Event Type: EC2 Instance State-change Notification
+#Specific Instance Ids (or Any Instance depending)
+#Add Target: Lambda Function name
+#Configure Data -> Give Rule Name and Description -> Create Rule
+
 ##func name: AutoAssignSecondaryIPWhenEC2GoesDown
 #execution role:
 

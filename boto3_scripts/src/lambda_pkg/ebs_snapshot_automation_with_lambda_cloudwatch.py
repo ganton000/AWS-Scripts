@@ -1,7 +1,12 @@
-import boto3
+'''
+Can run this script as cronjob through linux server
+will do this with AWS Lambda and CloudWatch event trigger instead
 
-profileName = "default"
-session = boto3.session.Session(profile_name=profileName)
+IAM Role should have EC2 Permissions
+(ensure Timeout for Lambda is sufficient)
+'''
+
+import boto3
 
 ec2_client = boto3.client("ec2", "us-east-1")
 
@@ -63,6 +68,8 @@ def generate_snapshot_of_volid(volids: list):
 	waiter.wait(SnapshotIds=[snapids])
 
 	print(f"Successfully completed snapshots for the volumes with ids {volids}")
+
+	return None
 
 
 generate_snapshot_of_volid(list_of_volids)

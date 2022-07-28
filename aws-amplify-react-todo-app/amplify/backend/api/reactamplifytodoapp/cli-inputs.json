@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "reactamplifytodoapp",
+    "serviceName": "AppSync",
+    "gqlSchemaPath": "/Users/georgeanton/Desktop/demo/AWS_Stuff/aws-amplify-react-todo-app/amplify/backend/api/reactamplifytodoapp/schema.graphql",
+    "defaultAuthType": {
+      "mode": "API_KEY",
+      "expirationTime": 7
+    }
+  }
+}

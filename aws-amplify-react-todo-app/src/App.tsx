@@ -1,4 +1,4 @@
-import React, { useEffect, useState, SetStateAction } from "react";
+import React, { useEffect, useState } from "react";
 import { Amplify, API, graphqlOperation } from "aws-amplify";
 import { createTodo } from "./graphql/mutations";
 import { listTodos } from "./graphql/queries";
@@ -14,9 +14,13 @@ const initialState = {
     description: "",
 };
 
+type Todos = {
+  [key: string]: string
+}
+
 function App() {
     const [formState, setFormState] = useState(initialState);
-    const [todos, setTodos] = useState(Array<{}>([]));
+    const [todos, setTodos] = useState([] as Todos[]);
 
     const setInput = (key: any, val: any): any => {
         setFormState({ ...formState, [key]: val });

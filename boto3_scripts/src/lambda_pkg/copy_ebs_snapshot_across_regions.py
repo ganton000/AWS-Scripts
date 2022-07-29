@@ -7,11 +7,6 @@ def get_owner_id():
 
 	return account_id
 
-filter_backup = {
-	'Name': 'tag:backup',
-	'Values': ['yes']
-}
-
 def get_ebs_snapshots_by_filter(ec2_client, ownerId, filter={}):
 
 	snapIds_to_backup=[]
@@ -24,15 +19,24 @@ def get_ebs_snapshots_by_filter(ec2_client, ownerId, filter={}):
 def make_copy_of_ebs(dest_region, source_region, snapshots_to_copy: list):
 	ec2_dest_client = session.client(service_name="ec2", region_name=dest_region)
 
+	resulting_snap_ids = []
 	for each_snap_id in snapshots_to_copy:
 		print(f"Taking backup for id of {each_snap_id} for region {dest_region}")
 
-		ec2_dest_client.copy_snapshot(
+		res_dict = ec2_dest_client.copy_snapshot(
 			Description=f"Copy of snapshot: {each_snap_id} from {dest_region} for disaster recovery",
 			SourceRegion= source_region,
 			SourceSnapshotId= each_snap_id
 		)
+
+		resulting_snap_ids.append(res_dict.get('SnapshotId'))
+
+	waiter = ec2_dest_client.get_waiter('snapshot_completed')
+	waiter.wait(SnapshotIds=[resulting_snap_ids])
+
 	print(f"EBS Snapshot copy to destination region {dest_region} is completed")
+
+	return None
 
 def delete_and_create_new_tags(client, snapshotIds):
 
@@ -60,6 +64,8 @@ def delete_and_create_new_tags(client, snapshotIds):
 			Tags=[tags_to_create]
 		)
 
+	return None
+
 
 
 
@@ -73,10 +79,26 @@ if __name__ == "__main__":
 	session= boto3.session.Session(profile_name=profileName)
 	ec2_source_client= session.client(service_name='ec2', region_name=source_region)
 
-	ownerId= get_owner_id()
+	ownerId = get_owner_id()
 
-	snapIds_to_backup= get_ebs_snapshots_by_filter(ec2_source_client, ownerId, filter_backup)
+	filter_backup = {
+	'Name': 'tag:backup',
+	'Values': ['yes']
+	}
 
-	make_copy_of_ebs(dest_region, source_region, snapIds_to_backup)
+	snapIds_to_backup = get_ebs_snapshots_by_filter(
+		ec2_client=ec2_source_client,
+		ownerId=ownerId,
+		filter=filter_backup
+	)
 
-	delete_and_create_new_tags(client=ec2_source_client, snapshotIds=snapIds_to_backup)
+	make_copy_of_ebs(
+		dest_region=dest_region,
+		source_region=source_region,
+		snapshots_to_copy=snapIds_to_backup
+	)
+
+	delete_and_create_new_tags(
+		client=ec2_source_client,
+		snapshotIds=snapIds_to_backup
+	)

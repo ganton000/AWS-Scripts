@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  s3-python-thumbnail
+
+  Sample SAM Template for s3-python-thumbnail
+
+Globals:
+  Function:
+    Timeout: 60
+    CodeUri: handler/
+    Runtime: python3.9
+    MemorySize: 128
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        THUMBNAIL_SIZE: 128
+        REGION_NAME: "us-east-1"
+
+Resources:
+  CreateThumbnailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.s3_thumbnail_generator
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: 's3:*'
+              Resource: '*'
+      Events:
+        CreateThumbnailEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref SrcBucket
+            Events: s3:ObjectCreated:*
+  SrcBucket:
+    Type: AWS::S3::Bucket
+
+Outputs:
+  ThumbnailAPI:
+    Description: "API Gateway endpoint URL for Prod stage for Thumbnail function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/images/"
+  CreateThumbnailFunction:
+    Description: "Create Thumbnail Lambda Function ARN"
+    Value: !GetAtt CreateThumbnailFunction.Arn
+  CreateThumbnailFunctionIamRole:
+    Description: "Implicit IAM Role created for Create Thumbnaild function"
+    Value: !GetAtt CreateThumbnailFunctionRole.Arn

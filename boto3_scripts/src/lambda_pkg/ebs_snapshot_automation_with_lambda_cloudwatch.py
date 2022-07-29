@@ -30,7 +30,7 @@ def list_all_ebs_volumes_with_filter(filter):
 
 #list_all_ebs_volumes_with_filter(filter_prod_backup)
 
-def paginate_over_ebs_volumes_with_filter(filter):
+def paginate_over_ebs_volumes_with_filter(filter, client=ec2_client):
 	paginator = ec2_client.get_paginator("describe_volumes")
 	for each_page in paginator.paginate(Filters=[filter]):
 
@@ -45,8 +45,11 @@ def paginate_over_ebs_volumes_with_filter(filter):
 
 list_of_volids = paginate_over_ebs_volumes_with_filter(filter_prod_backup)
 
-def generate_snapshot_of_volid(volids: list):
+def generate_snapshot_of_volid(volids: list, client=ec2_client):
 	snapids = []
+	if not list_of_volids:
+		print("No Volume Ids available to take snapshots for this region")
+		return None
 	for each_volid in list_of_volids:
 		print(f"Taking snap of {each_volid}")
 		res = ec2_client.create_snapshot(

@@ -1,3 +1,12 @@
+'''
+Session object is only necessary from local host,
+on lambda, can remove session and replace with boto3.
+
+Make sure to have role which gives EC2 permissions
+(and be wary of timeout execution)
+
+To schedule/automate, add CloudWatch Events trigger
+'''
 import boto3
 
 
@@ -67,13 +76,10 @@ def delete_and_create_new_tags(client, snapshotIds):
 	return None
 
 
-
-
-
 if __name__ == "__main__":
 
 	source_region= 'us-east-1'
-	dest_region = 'us-east-2'
+	dest_region= 'us-east-2'
 	profileName= 'default'
 
 	session= boto3.session.Session(profile_name=profileName)

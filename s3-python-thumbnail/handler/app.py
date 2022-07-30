@@ -1,6 +1,7 @@
 from datetime import datetime
 import boto3
 from io import BytesIO
+#Added layer for PIL import (pillow)
 from PIL import Image, ImageOps
 import os
 import uuid
@@ -8,6 +9,10 @@ import json
 
 s3 = boto3.client("s3")
 size = int(os.getenv("THUMBNAIL_SIZE"))
+dbtable = str(os.getenv("DYNAMODB_TABLE"))
+region = str(os.getenv("REGION_NAME"))
+
+ddb = boto3.resource('dynamodb', region_name=region)
 
 def s3_thumbnail_generator(event, context):
     print("Event::", event)
@@ -16,7 +21,7 @@ def s3_thumbnail_generator(event, context):
     key = event['Records'][0]['s3']['object']['key']
     img_size = event['Records'][0]['s3']['object']['size']
 
-    if (not key.endswith("_thhumbnail.png")):
+    if (not key.endswith("_thumbnail.png")):
         image = get_s3_image(bucket, key)
 
         thumbnail = image_to_thumbnail(image)
@@ -63,6 +68,25 @@ def upload_to_s3(bucket, key, image, img_size):
     url = '{}/{}/{}'.format(s3.meta.endpoint_url, bucket, key)
 
     #save image url to db
-    #s3_save_thumbnail_url_to_dynamo(url_path=url, img_size=img_size)
+    s3_save_thumbnail_url_to_dynamo(url_path=url, img_size=img_size)
 
     return url
+
+def s3_save_thumbnail_url_to_dynamo(url_path, img_size):
+    toint = float(img_size*0.53)/1000
+    table = ddb.Table(dbtable)
+    response = table.put_item(
+        Item={
+            'id': str(uuid.uuid4()),
+            'url': str(url_path),
+            'approxReducedSize': str(toint) + str(' KB'),
+            'createdAt': str(datetime.now()),
+            'updatedAt': str(datetime.now())
+        }
+    )
+
+    return {
+        'statusCode': 200,
+        'headers': {'Content-Type': 'application/json'},
+        'body': json.dumps(response)
+    }

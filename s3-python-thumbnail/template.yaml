@@ -17,6 +17,9 @@ Globals:
       Variables:
         THUMBNAIL_SIZE: 128
         REGION_NAME: "us-east-1"
+        DYNAMODB_TABLE: !Ref ImagesDynamoDbTable
+    Layers:
+      - "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p39-pillow:1"
 
 Resources:
   CreateThumbnailFunction:
@@ -24,6 +27,8 @@ Resources:
     Properties:
       Handler: app.s3_thumbnail_generator
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ImagesDynamoDbTable
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -38,13 +43,27 @@ Resources:
   SrcBucket:
     Type: AWS::S3::Bucket
 
-Outputs:
-  ThumbnailAPI:
-    Description: "API Gateway endpoint URL for Prod stage for Thumbnail function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/images/"
-  CreateThumbnailFunction:
-    Description: "Create Thumbnail Lambda Function ARN"
-    Value: !GetAtt CreateThumbnailFunction.Arn
-  CreateThumbnailFunctionIamRole:
-    Description: "Implicit IAM Role created for Create Thumbnaild function"
-    Value: !GetAtt CreateThumbnailFunctionRole.Arn
+  ImagesDynamoDbTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      TableName: "images-url-tables"
+
+#Outputs:
+#  ThumbnailAPI:
+#    Description: "API Gateway endpoint URL for Prod stage for Thumbnail function"
+#    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/images/"
+#  CreateThumbnailFunction:
+#    Description: "Create Thumbnail Lambda Function ARN"
+#    Value: !GetAtt CreateThumbnailFunction.Arn
+#  CreateThumbnailFunctionIamRole:
+#    Description: "Implicit IAM Role created for Create Thumbnaild function"
+#    Value: !GetAtt CreateThumbnailFunctionRole.Arn

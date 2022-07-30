@@ -63,7 +63,7 @@ def upload_to_s3(bucket, key, image, img_size):
         Key=key
     )
 
-    print(response)
+    print("Response:: ", response)
 
     url = '{}/{}/{}'.format(s3.meta.endpoint_url, bucket, key)
 
@@ -89,4 +89,41 @@ def s3_save_thumbnail_url_to_dynamo(url_path, img_size):
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
         'body': json.dumps(response)
+    }
+
+def s3_get_thumbnail_urls(event, context):
+    '''
+    get all image urls from ddb and show in json format
+    '''
+    table = ddb.Table(dbtable)
+    response = table.scan()
+    data = response['Items']
+
+    #paginate through results
+    while 'LastEvaluatedKey' in response:
+        response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+        data.extend(response['Items'])
+
+    return {
+        'statusCode': 200,
+        'headers': {'Content-Type': 'application/json'},
+        'body': json.dumps(data)
+    }
+
+def s3_get_item(event, context):
+    table = ddb.Table(dbtable)
+    response = table.get_item(Key={
+        'id': event['pathParameters']['id']
+    })
+
+    item = response['Item']
+
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        'body': json.dumps(item),
+        'isBase64Encoded': False
     }

@@ -127,3 +127,33 @@ def s3_get_item(event, context):
         'body': json.dumps(item),
         'isBase64Encoded': False
     }
+
+def s3_delete_item(event, context):
+    table = ddb.Table(dbtable)
+    item_id = event['pathParameters']['id']
+
+    response = {
+        "statusCode": 500,
+        "body": f"An error occured while deleting post {item_id}"
+    }
+
+    response = table.delete_item(Key={
+        'id': item_id
+    })
+
+    success_response = {
+        "deleted": True,
+        "itemDeletedId": item_id
+    }
+
+    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        response = {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps(success_response)
+        }
+
+    return response

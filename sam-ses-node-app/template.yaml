@@ -30,12 +30,9 @@ Resources:
             Method: post
 
 Outputs:
-  HelloWorldApi:
+  CreateContactApi:
     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/contact-us/"
+  CreateContactFunction:
+    Description: "Create Contact Lambda Function ARN"
+    Value: !GetAtt CreateContactFunction.Arn

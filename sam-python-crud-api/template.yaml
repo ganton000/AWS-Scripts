@@ -6,31 +6,123 @@ Description: >
   Sample SAM Template for sam-python-crud-api
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 10
+    MemorySize: 128
+    Runtime: python3.9
+    Tracing: Active
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref Table
+        REGION_NAME: !Ref Region
+  Api:
+    TracingEnabled: True #adds xray tracing
+
+Parameters:
+  Table:
+    Type: String
+    Default: Posts
+  Region:
+    Type: String
+    Default: us-east-1
 
 Resources:
-  HelloWorldFunction:
+  CreatePostFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello_world/
+      CodeUri: handler/create_post
       Handler: app.lambda_handler
       Runtime: python3.9
-      Architectures:
-        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PostsTable
       Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        CreatePost:
+          Type: Api
           Properties:
             Path: /hello
             Method: get
 
+  DeletePostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: handler/delete_post
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PostsTable
+      Events:
+        DeletePost:
+          Type: Apo
+          Properties:
+            Path: /posts/{id}
+            Method: delete
+
+  GetPostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: handler/get_post
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PostsTable
+      Events:
+        GetPost:
+          Type: Api
+          Properties:
+            Path: /posts/{id}
+            Method: get
+  ListPostsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: handler/list_posts
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PostsTable
+      Events:
+        ListPosts:
+          Type: Api
+          Properties:
+            Path: /posts/
+            Method: get
+  UpdatePostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: handler/update_post
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PostsTable
+      Events:
+        UpdatePost:
+          Type: Api
+          Properties:
+            Path: /posts/{id}
+            Method: put
+  PostsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: !Ref Table
+
 Outputs:
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  PostCrudAPI:
+    Description: "API Gateway endpoint URL for Prod stage for REST API functions"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/posts/"
+  CreatePostFunction:
+    Description: "Create Post Lambda Function ARN"
+    Value: !GetAtt CreatePostFunction.Arn

@@ -4,13 +4,14 @@ const {
     GraphQLString,
     GraphQLInt,
     GraphQLSchema,
+    GraphQLList,
 } = require("graphql");
 
 let _ = require("lodash");
 
 let usersData = [
     {
-        id: "345",
+        id: "1",
         name: "Anton",
         age: 32,
         profession: "Engineer",
@@ -28,11 +29,19 @@ let hobbiesData = [
         id: "1",
         title: "Programming",
         description: "Using computers",
+        userId: "1",
+    },
+	{
+        id: "3",
+        title: "Chess",
+        description: "Playing chess games",
+        userId: "1",
     },
     {
         id: "2",
         title: "Fencing",
         description: "Using swords",
+        userId: "2",
     },
 ];
 
@@ -40,10 +49,17 @@ let postData = [
     {
         id: "1",
         comment: "first comment",
+        userId: "1",
+    },
+    {
+        id: "3",
+        comment: "another comment",
+        userId: "1",
     },
     {
         id: "2",
         comment: "second comment",
+        userId: "2",
     },
 ];
 
@@ -64,6 +80,20 @@ const UserType = new GraphQLObjectType({
         profession: {
             type: GraphQLString,
         },
+
+        posts: {
+            type: new GraphQLList(PostType),
+            resolve(parent, args) {
+                return _.filter(postData, { userId: parent.id });
+            },
+        },
+
+        hobbies: {
+            type: new GraphQLList(HobbyType),
+            resolve(parent, args) {
+                return _.filter(hobbiesData, { userId: parent.id });
+            },
+        },
     }),
 });
 
@@ -80,6 +110,12 @@ const HobbyType = new GraphQLObjectType({
         description: {
             type: GraphQLString,
         },
+        user: {
+            type: UserType,
+            resolve(parent, args) {
+                return _.find(usersData, { id: parent.userId });
+            },
+        },
     }),
 });
 
@@ -92,6 +128,12 @@ const PostType = new GraphQLObjectType({
         },
         comment: {
             type: GraphQLString,
+        },
+        user: {
+            type: UserType,
+            resolve(parent, args) {
+                return _.find(usersData, { id: parent.userId });
+            },
         },
     }),
 });

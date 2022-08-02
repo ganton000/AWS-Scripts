@@ -36,6 +36,17 @@ let hobbiesData = [
     },
 ];
 
+let postData = [
+    {
+        id: "1",
+        comment: "first comment",
+    },
+    {
+        id: "2",
+        comment: "second comment",
+    },
+];
+
 //Types
 const UserType = new GraphQLObjectType({
     name: "User",
@@ -72,6 +83,19 @@ const HobbyType = new GraphQLObjectType({
     }),
 });
 
+const PostType = new GraphQLObjectType({
+    name: "Post",
+    description: "Post description",
+    fields: () => ({
+        id: {
+            type: GraphQLID,
+        },
+        comment: {
+            type: GraphQLString,
+        },
+    }),
+});
+
 //Root Query
 const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",
@@ -92,8 +116,14 @@ const RootQuery = new GraphQLObjectType({
             args: { id: { type: GraphQLID } },
 
             resolve(parent, args) {
-
                 return _.find(hobbiesData, { id: args.id });
+            },
+        },
+        post: {
+            type: PostType,
+            args: { id: { type: GraphQLID } },
+            resolve(parent, args) {
+                return _.find(postData, { id: args.id });
             },
         },
     },

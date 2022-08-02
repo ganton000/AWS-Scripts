@@ -31,7 +31,7 @@ let hobbiesData = [
         description: "Using computers",
         userId: "1",
     },
-	{
+    {
         id: "3",
         title: "Chess",
         description: "Playing chess games",
@@ -171,6 +171,31 @@ const RootQuery = new GraphQLObjectType({
     },
 });
 
+//Mutations
+const Mutation = new GraphQLObjectType({
+    name: "Mutation",
+    fields: {
+        createUser: {
+            type: UserType,
+            args: {
+                id: { type: GraphQLID },
+                name: { type: GraphQLString },
+                age: { type: GraphQLInt },
+                profession: { type: GraphQLString },
+            },
+            resolve(parent, args) {
+                let user = {
+                    name: args.name,
+                    age: args.age,
+                    profession: args.profession,
+                };
+                return user;
+            },
+        },
+    },
+});
+
 module.exports = new GraphQLSchema({
     query: RootQuery,
+    mutation: Mutation,
 });

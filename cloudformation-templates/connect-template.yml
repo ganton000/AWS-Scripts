@@ -1,0 +1,9 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Specifies an example of contact flow for an Amazon Connect Instance
+Resources:
+  BasicFlow:
+    Type: AWS::Connect::ContactFlow
+    Properties:
+      Content:
+      InstanceArn:
+      Name:

@@ -44,7 +44,7 @@ routes = [
 """ --- HELPER FUNCTIONS --- """
 
 """ --- API CALLS --- """
-def create_rest_api(api_name: str, api_desc: str, lambda_uri: Optional[str]=None ) -> str:
+def create_rest_api(api_name: str, api_desc: str) -> str:
 	try:
 		response = apigw.create_rest_api(
 			name=api_name,
@@ -59,7 +59,7 @@ def create_rest_api(api_name: str, api_desc: str, lambda_uri: Optional[str]=None
 		logger.exception(err)
 		exit(1)
 
-def create_api_route(api_id: str, route_params: List[dict]):
+def create_api_route(api_id: str, route_params: List[dict], lambda_uri: Optional[str]=None):
 
 	method_response = {
 		"string" : {

@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import List, Optional
 
 import boto3
 
@@ -43,7 +44,7 @@ routes = [
 """ --- HELPER FUNCTIONS --- """
 
 """ --- API CALLS --- """
-def create_rest_api(api_name: str, api_desc: str) -> str:
+def create_rest_api(api_name: str, api_desc: str, lambda_uri: Optional[str]=None ) -> str:
 	try:
 		response = apigw.create_rest_api(
 			name=api_name,
@@ -58,7 +59,7 @@ def create_rest_api(api_name: str, api_desc: str) -> str:
 		logger.exception(err)
 		exit(1)
 
-def create_api_route(api_id: str, route_params):
+def create_api_route(api_id: str, route_params: List[dict]):
 
 	method_response = {
 		"string" : {

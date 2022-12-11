@@ -106,6 +106,74 @@ class ApiGatewayService:
 
 		return url
 
+	def add_integration_method(self, resource_id: str, rest_method: str,
+		service_endpoint_prefix: str, service_action: str, service_method: str,
+		role_arn: str, mapping_template: dict) -> None:
+		"""Adds an integration method to a REST API. An integration method is a REST
+        resource, such as '/users', and an HTTP verb, such as GET. The integration
+        method is backed by an AWS service, such as Amazon DynamoDB.
+
+		Args:
+			resource_id (str): The ID of the REST resource
+			rest_method (str): The HTTP verb used with the REST resource
+			service_endpoint_prefix (str): The service endpoint that is integrated with this method, such as 'dynamodb'.
+			service_action (str): The action that is called on the service, such as 'GetItem'
+			service_method (str): The HTTP method of the service request, such as POST.
+			role_arn (str): Role ARN that grants API Gateway permission to use the specified action with the service.
+			mapping_template (_type_):  A mapping template that is used to translate REST elements, such as query parameters, to the request body format required by the service.
+		"""
+
+		service_uri = (f"arn:aws:apigateway:{self.apigw_client.meta.region_name}"
+					   f":{service_endpoint_prefix}:action/{service_action}")
+		try:
+			self.apigw_client.put_method(
+				restApiId=self.api_id,
+				resourceId=resource_id,
+				httpMethod=rest_method,
+				authorizationType="NONE"
+			)
+			self.apigw_client.put_method_response(
+				restApiId=self.api_id,
+				resourceId=resource_id,
+				httpMethod=rest_method,
+				statusCode="200",
+				responseModels={"application/json": ""}
+			)
+
+			logger.info(f"Created {rest_method} method for resource {resource_id}")
+		except Exception as err:
+			logger.exception(f"Couldn't create {rest_method} method for resource {resource_id}")
+			raise err
+
+		try:
+
+			self.apigw_client.put_integration(
+				restApiId=self.api_id,
+				resourceId=resource_id,
+				httpMethod=rest_method,
+				type="AWS",
+				integrationHttpMethod=service_method,
+				credentials=role_arn,
+				requestTemplates={"application/json": json.dumps(mapping_template)},
+				uri=service_uri,
+				passthroughBehavior="WHEN_NO_TEMPLATES"
+			)
+
+			self.apigw_client.put_integration_response(
+				restApiId=self.api_id,
+				resourceId=resource_id,
+				httpMethod=rest_method,
+				statusCode="200",
+				responseTemplates={"application/json": ""}
+			)
+
+			logger.info(f"Created integration for resource {resource_id} to service URI {service_uri}")
+		except Exception as err:
+			logger.info(f"Couldn't create integration for resource {resource_id} to service URI {service_uri}")
+			raise err
+
+
+
 
 
 

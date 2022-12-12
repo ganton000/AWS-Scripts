@@ -13,13 +13,11 @@ logging.basicConfig(
 	)
 logger = logging.getLogger(__name__)
 
-#initialize client
-apigw = boto3.client("apigateway")
-
 class ApiGatewayService:
 
-	def __init__(self, apigw_client):
+	def __init__(self, apigw_client: str, account_id:str) -> None:
 		self.apigw_client = apigw_client
+		self._account_id = account_id
 		self.api_id = None
 		self.root_id = None
 		self.stage = None
@@ -217,3 +215,10 @@ class ApiGatewayService:
 		except ClientError:
 			logger.exception(f"Couldn't delete REST Api with id {self.api_id}")
 			raise
+
+	def get_api_arn(self) -> str:
+
+		return (
+			f"arn:aws:execute-api:{self.apigw_client.meta.region_name}:"
+			f"{self._account_id}:{self.api_id}"
+		)

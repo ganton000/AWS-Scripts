@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ApiGatewayService:
 
-	def __init__(self, apigw_client: str, account_id:str) -> None:
+	def __init__(self, apigw_client: object, account_id:str) -> None:
 		self.apigw_client = apigw_client
 		self._account_id = account_id
 		self.api_id = None

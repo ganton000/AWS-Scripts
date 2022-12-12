@@ -5,8 +5,43 @@ Description: >
   Creates DynamoDB to store data posted from API Gateway
   Creates Lambdas that are triggered by API Gateway
 
+Parameters:
+
 Globals:
   Function:
-    Timeout: 15
+    Timeout: 5
+    MemorySize: 128
 
 Resources:
+  AddTransaction:
+    Type: AWS::ServerlessFunction
+    Properties:
+      FunctionName: AddTransaction
+      Handler: add_transaction.lambda_handler
+      Runtime: python3.9
+      Role: "arn:aws:iam::${AccountId}:role/{roleName}"
+      CodeUri: ../functions/
+  GetTransaction:
+    Type: AWS::ServerlessFunction
+    Properties:
+      FunctionName: GetTransaction
+      Handler: get_transaction.lambda_handler
+      Runtime: python3.9
+      Role: "arn:aws:iam::${AccountId}:role/{roleName}"
+      CodeUri: ../functions/
+  GetTransactions:
+    Type: AWS::ServerlessFunction
+    Properties:
+      FunctionName: GetTransactions
+      Handler: get_transactions.lambda_handler
+      Runtime: python3.9
+      Role: "arn:aws:iam::${AccountId}:role/{roleName}"
+      CodeUri: ../functions/
+  DeleteTransaction:
+    Type: AWS::ServerlessFunction
+    Properties:
+      FunctionName: DeleteTransaction
+      Handler: delete_transaction.lambda_handler
+      Runtime: python3.9
+      Role: "arn:aws:iam::${AccountId}:role/{roleName}"
+      CodeUri: ../functions/

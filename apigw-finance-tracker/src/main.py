@@ -1,8 +1,5 @@
-import json
 import logging
-from typing import List, Optional
 
-from botocore.exceptions import ClientError
 import boto3
 
 #initialize logger
@@ -18,7 +15,7 @@ apigw_client = boto3.client("apigateway")
 lambda_client = boto3.client("lambda")
 s3_client = boto3.client("s3")
 dynamo_client = boto3.client("dynamo")
-sts_client = boto3.client('sts')
+sts_client = boto3.client("sts")
 
 #Define routes
 routes = [
@@ -45,8 +42,6 @@ routes = [
 ]
 
 """ --- HELPER FUNCTIONS --- """
-
-""" --- API CALLS --- """
 
 
 """ --- MAIN HANDLER --- """

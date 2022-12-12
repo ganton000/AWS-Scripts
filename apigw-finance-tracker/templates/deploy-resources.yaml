@@ -7,6 +7,18 @@ Description: >
 
 Parameters:
 
+AccountId:
+  Type: String
+  Description: Account ID
+
+Region:
+  Type: String
+  Description: Account Region
+
+LogLevel:
+  Type: String
+  Description: Logger Level
+
 Globals:
   Function:
     Timeout: 5

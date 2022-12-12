@@ -1,0 +1,38 @@
+####################################################
+# aws cloudformation deploy
+#   --s3-bucket
+#   --template-file
+#   --stack-name
+#   --parameter-overrides $(cat create-pipeline.parameters | grep -v "^#" )
+#   --profile
+#   --capabilities CAPABILITY_NAMED_IAM
+#   --region us-east-1
+
+####################################################
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Create AWS Pipeline for Finance Tracker project
+
+Parameters:
+  CodeDirectory:
+    Type: String
+    Description: Path to code directory
+
+  CodeRepositoryName:
+    Type: String
+    Description: CodeCommit repository name
+
+  S3Bucket:
+    Type: String
+    Bucket: S3 Bucket which will hold artifacts
+
+  branchName:
+    Type: String
+    Description: Branch Name
+
+  AccountId:
+    Type: Number
+    Description: AWS Account number
+
+
+

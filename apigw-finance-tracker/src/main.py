@@ -2,6 +2,8 @@ import logging
 
 import boto3
 
+from models.ApiGatewayService import ApiGatewayService
+
 #initialize logger
 logging.basicConfig(
 	format="%(asctime)s %(message)s",
@@ -45,8 +47,9 @@ routes = [
 
 
 """ --- MAIN HANDLER --- """
-def main():
-	pass
+def main(account_id: str, api_name: str) -> None:
+
+	apigw = ApiGatewayService(apigw_client, account_id, api_name)
 
 if __name__ == "__main__":
 
@@ -55,3 +58,4 @@ if __name__ == "__main__":
 	api_name = "finance-tracker"
 	api_base_path = "transactions"
 	api_stage = "dev"
+

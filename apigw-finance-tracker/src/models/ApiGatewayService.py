@@ -15,27 +15,28 @@ logger = logging.getLogger(__name__)
 
 class ApiGatewayService:
 
-	def __init__(self, apigw_client: object, account_id:str) -> None:
+	def __init__(self, apigw_client: object, account_id: str, api_name: str, stage: str) -> None:
 		self.apigw_client = apigw_client
 		self._account_id = account_id
+		self.api_name = api_name
+		self.stage = stage
 		self.api_id = None
 		self.root_id = None
-		self.stage = None
 
-	def create_rest_api(self, api_name: str, api_desc: Optional[str]=None) -> None:
+	def create_rest_api(self, api_desc: Optional[str]=None) -> None:
 		#The default API has only a root resource and no HTTP methods
 
 		try:
 			response = self.apigw_client.create_rest_api(
-				name=api_name,
-				description= api_desc if api_desc is not None else api_name
+				name=self.api_name,
+				description= api_desc if api_desc is not None else self.api_name
 			)
 
 			self.api_id = response["id"]
-			logger.info(f"Created REST API {api_name} with id {self.api_id}")
+			logger.info(f"Created REST API {self.api_name} with id {self.api_id}")
 
 		except ClientError:
-			logger.exception(f"Couldn't create REST API {api_name}")
+			logger.exception(f"Couldn't create REST API {self.api_name}")
 			raise
 
 	def add_rest_resource(self, parent_id: str, resource_path: str) -> str:
@@ -66,29 +67,24 @@ class ApiGatewayService:
 		else:
 			return resource_id
 
-	def deploy_api(self, stage_name: str):
+	def deploy_api(self) -> None:
 		""" After a REST API is deployed, it can be called from any
         REST client, such as the Python Requests package or Postman.
 
 		Args:
 			stage_name (_type_): stage of the API to deploy; i.e. 'tst'.
-
-		Returns: base URL of the deployed REST API.
 		"""
 
-		self.stage = stage_name
 		try:
 			self.apig_client.create_deployment(
                 restApiId=self.api_id,
-				stageName=stage_name
+				stageName=self.stage
 			)
 
-			logger.info(f"Deployed to stage {stage_name}")
+			logger.info(f"Deployed to stage {self.stage}")
 		except ClientError:
-			logger.exception(f"Couldn't deploy to stage {stage_name}")
+			logger.exception(f"Couldn't deploy to stage {self.stage}")
 			raise
-		else:
-			return self.api_url
 
 	def api_url(self, resource: Optional[str]=None) -> str:
 		""" Builds the REST API URL from its parts.
